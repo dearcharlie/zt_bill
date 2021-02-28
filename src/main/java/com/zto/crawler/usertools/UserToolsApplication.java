@@ -83,51 +83,57 @@ public class UserToolsApplication implements ApplicationRunner {
             // 点击订单信息按钮
             webDriver.findElementByCssSelector("div[data-type=orderInfo]").click();
 
-            // 等待订单信息表格出现
-            new WebDriverWait(webDriver, 60).until(new ExpectedCondition<WebElement>() {
-                @NullableDecl
-                @Override
-                public WebElement apply(@NullableDecl WebDriver webDriver) {
-                    return webDriver.findElement(By.cssSelector(".orderInfo .z_table"));
+            try {
+                // 等待订单信息表格出现
+                new WebDriverWait(webDriver, 4).until(new ExpectedCondition<WebElement>() {
+                    @NullableDecl
+                    @Override
+                    public WebElement apply(@NullableDecl WebDriver webDriver) {
+                        return webDriver.findElement(By.cssSelector(".orderInfo .z_table"));
+                    }
+                });
+
+                // 获取表格
+                WebElement orderInfo = webDriver.findElementByCssSelector(".orderInfo .z_table tbody tr");
+                // 获取信息
+                String user = orderInfo.findElement(By.cssSelector("td:nth-child(5)")).getText();
+                String address = orderInfo.findElement(By.cssSelector("td:nth-child(6)")).getText();
+
+                // 按指定模式在字符串查找
+                String userRegx = "^(.+?)\\s+(\\d+)\\n.*$";
+
+                // 创建 Pattern 对象
+                Pattern userPattern = Pattern.compile(userRegx);
+
+                // 现在创建 matcher 对象
+                Matcher userMatcher = userPattern.matcher(user);
+                if (userMatcher.find( )) {
+                    System.out.println("姓名: " + userMatcher.group(1) );
+                    System.out.println("电话: " + userMatcher.group(2) );
+                    bill.setName(userMatcher.group(1));
+                    bill.setMobile(userMatcher.group(2));
+                } else {
+                    System.out.println("NO MATCH");
                 }
-            });
 
-            // 获取表格
-            WebElement orderInfo = webDriver.findElementByCssSelector(".orderInfo .z_table tbody tr");
-            // 获取信息
-            String user = orderInfo.findElement(By.cssSelector("td:nth-child(5)")).getText();
-            String address = orderInfo.findElement(By.cssSelector("td:nth-child(6)")).getText();
+                // 按指定模式在字符串查找
+                String addrRegx = "^(.+?)查看原始地址$";
 
-            // 按指定模式在字符串查找
-            String userRegx = "^(.+?)\\s+(\\d+)\\n.*$";
+                // 创建 Pattern 对象
+                Pattern addrPattern = Pattern.compile(addrRegx);
 
-            // 创建 Pattern 对象
-            Pattern userPattern = Pattern.compile(userRegx);
-
-            // 现在创建 matcher 对象
-            Matcher userMatcher = userPattern.matcher(user);
-            if (userMatcher.find( )) {
-                System.out.println("姓名: " + userMatcher.group(1) );
-                System.out.println("电话: " + userMatcher.group(2) );
-                bill.setName(userMatcher.group(1));
-                bill.setMobile(userMatcher.group(2));
-            } else {
-                System.out.println("NO MATCH");
-            }
-
-            // 按指定模式在字符串查找
-            String addrRegx = "^(.+?)查看原始地址$";
-
-            // 创建 Pattern 对象
-            Pattern addrPattern = Pattern.compile(addrRegx);
-
-            // 现在创建 matcher 对象
-            Matcher addrMatcher = addrPattern.matcher(address);
-            if (addrMatcher.find( )) {
-                System.out.println("地址: " + addrMatcher.group(1) );
-                bill.setAddress(addrMatcher.group(1));
-            } else {
-                System.out.println("NO MATCH");
+                // 现在创建 matcher 对象
+                Matcher addrMatcher = addrPattern.matcher(address);
+                if (addrMatcher.find( )) {
+                    System.out.println("地址: " + addrMatcher.group(1) );
+                    bill.setAddress(addrMatcher.group(1));
+                } else {
+                    System.out.println("NO MATCH");
+                }
+            }catch (Exception e){
+                Thread.sleep(1000);
+                webDriver.findElement(By.cssSelector(".ztosec-msg-modal-btn")).click();
+                System.out.println("没有匹配");
             }
         }
 
